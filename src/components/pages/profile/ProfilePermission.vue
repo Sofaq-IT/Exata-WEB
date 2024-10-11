@@ -16,24 +16,6 @@ s<template>
         </v-row>
         <v-row>
           <v-col>
-            <h2>Seções</h2>
-          </v-col>
-        </v-row>
-        <v-divider class="mt-2 mb-2"></v-divider>
-        <v-row>
-          <v-col cols="3" v-for="s in secoes" :key="s">
-            <v-switch
-              :label="s.descricao"
-              color="primary"
-              v-model="s.checked"
-              @update:modelValue="
-                (checked) => atualizarSecao(s.secaoID, checked)
-              "
-            ></v-switch>
-          </v-col>
-        </v-row>        
-        <v-row>
-          <v-col>
             <h2>Permissões</h2>
           </v-col>
         </v-row>
@@ -111,13 +93,11 @@ export default {
         ativo: true,
         perfilControllerAction: [],
       },
-      permissoes: [],
-      secoes: [],
+      permissoes: []
     };
   },
   async created() {
     this.perfil.perfilID = this.$route.params.id ? this.$route.params.id : 0;
-    await this.listarSecoes();
     await this.listarPermissoes();    
     await this.carregarDadosPerfil();
   },
@@ -152,19 +132,6 @@ export default {
         console.log(err);
       }
     },
-    async marcarSecoes() {
-      const secoesMarcadas = this.perfil.perfilSecao.map(
-        (p) => p.secaoID
-      );
-
-      this.secoes.forEach(
-        (p) =>
-          (p.checked =
-            secoesMarcadas.indexOf(p.secaoID) >= 0
-              ? true
-              : false)
-      );
-    },
     async marcarPermissoes() {
       const permissoesConcedidas = this.perfil.perfilControllerAction.map(
         (p) => p.controllerActionID
@@ -184,28 +151,6 @@ export default {
           {
             perfilID: this.perfil.perfilID,
             controllerActionID: controllerActionID,
-          },
-          checked
-        );
-      } catch (err) {
-        console.log(err);
-      }
-    },
-    async listarSecoes() {
-      try {
-        const response = await ProfileService.getSections();
-        this.secoes = response.data;
-        this.secoes.forEach((s) => (s.checked = false));
-      } catch (err) {
-        console.log(err);
-      }
-    },
-    async atualizarSecao(secaoID, checked) {
-      try {
-        await ProfileService.updateSection(
-          {
-            perfilID: this.perfil.perfilID,
-            secaoID: secaoID,
           },
           checked
         );

@@ -63,7 +63,7 @@
     </v-navigation-drawer>
 
     <v-app-bar app>
-      <v-toolbar-title>Seja bem vindo ao WAutom!</v-toolbar-title>
+      <v-toolbar-title>Seja bem vindo ao Sistema Exata!</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-switch
         label="Tema Escuro"
@@ -135,34 +135,12 @@ export default {
       drawer: false,
       mini: true,
       items: [
-        {
-          title: "Contato",
-          icon: "mdi-calendar-account",
-          link: "/interno/contato",
-        },
         { title: "Perfil", icon: "mdi-account-key", link: "/interno/perfil" },
-        { title: "Seção", icon: "mdi-domain", link: "/interno/secao" },
-        {
-          title: "Telefone",
-          icon: "mdi-cellphone-message",
-          link: "/interno/telefone",
-        },
         {
           title: "Usuários",
           icon: "mdi-account-group",
           link: "/interno/usuario",
-        },
-        {
-          title: "Tipo Contato",
-          icon: "mdi-format-list-bulleted-type",
-          link: "/interno/tipoContato",
-        },
-        { title: "Chat", icon: "mdi-chat-outline", link: "/interno/chat" },
-        {
-          title: "Licença/Contratante",
-          icon: "mdi-license",
-          link: "/interno/contratante",
-        },
+        }
       ],
       dadosCadastrais: false,
       showUpdatePassword: false,

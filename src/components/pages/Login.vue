@@ -57,7 +57,6 @@
 <script>
 import ApiService from "@/plugins/api";
 import store from "@/plugins/store";
-import ContractorService from "@/services/ContractorService";
 export default {
   data() {
     return {
@@ -98,20 +97,9 @@ export default {
         this.error = "Por favor, preencha todos os campos obrigatórios.";
       }
     },
-    async getLog() {
-      try {
-        const resp = await ContractorService.getLogo();
-        if (resp.data) {
-          this.logo = "data:image/png;base64," + resp.data;
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    },
   },
   created() {
     store.commit("setToken", null);
-    this.getLog();
   },
 };
 </script>
