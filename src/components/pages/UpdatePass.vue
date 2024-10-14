@@ -10,91 +10,76 @@
               contain
               width="250"
             ></v-img>
-            <h5 style="text-align: center">
+            <h3 style="text-align: center">
               Plataforma para Agricultura de Precisão
+            </h3>
+            <h5 style="text-align: center">
+              Cadastre sua nova senha
             </h5>
             <v-form
               ref="form"
               style="padding: 25px"
-              @submit.prevent="handleLogin"
+              @submit.prevent="updatePass"
             >
               <v-text-field
-                v-model="login"
-                label="Login"
-                prepend-icon="mdi-account"
-                :rules="[rules.required]"
-              ></v-text-field>
-              
-              <v-text-field
                 v-model="password"
-                label="Senha"
-                :type="showPass ? 'text' : 'password'"
+                label="Nova Senha"
+                :type="showPass1 ? 'text' : 'password'"
                 prepend-icon="mdi-lock"
-                :rules="[rules.required, rules.min]"
-                :append-icon="showPass ? 'mdi-eye' : 'mdi-eye-off'"
+                :rules="senhaRules"
+                :append-icon="showPass1 ? 'mdi-eye' : 'mdi-eye-off'"
                 counter
                 hint="Mínimo de 8 caracteres"
                 class="mb-3"
-                @click:append="showPass = !showPass"
+                @click:append="showPass1 = !showPass1"
               ></v-text-field>
-              <div class="mb-5 text-center">
-              <a
-                class="text-caption text-decoration-none text-blue"
-                href="/esqueciMinhaSenha"
-                rel="noopener noreferrer"
-              >
-                Esqueci minha senha</a></div>
+              
+              <v-text-field
+                v-model="confirmPassword"
+                label="Confirme a Senha"
+                :type="showPass2 ? 'text' : 'password'"
+                prepend-icon="mdi-lock"
+                :rules="confirmacaoSenhaRules"
+                :append-icon="showPass2 ? 'mdi-eye' : 'mdi-eye-off'"
+                counter
+                hint="Mínimo de 8 caracteres"
+                class="mb-3"
+                @click:append="showPass2 = !showPass2"
+              ></v-text-field>
+
               <v-divider></v-divider>
-              <v-btn type="submit" class="mt-3 w-100">Entrar</v-btn>
+              <v-btn type="submit" class="mt-3 w-100">SALVAR NOVA SENHA</v-btn>
             </v-form>
             <v-alert v-if="error" type="error" dismissible>{{ error }}</v-alert>
           </v-card-text>
         </v-card>
       </v-col>
       <v-col cols="3"></v-col>
-      <!-- <v-col cols="8" style="padding: 0">
-        <img
-          src="https://getbots.com.br/wp-content/uploads/2022/12/chatbot-para-google-business-messages.jpg"
-          style="width: 100%; min-height: 610px"
-        />
-      </v-col> -->
     </v-row>
   </v-container>
 </template>
 
 <script>
 import ApiService from "@/plugins/api";
-import store from "@/plugins/store";
 export default {
   data() {
     return {
-      login: "",
+      email: "",
       password: "",
+      confirmPassword: "",
       error: null,
-      rules: {
-        required: (value) => !!value || "Este campo é obrigatório",
-        min: (v) => v.length >= 8 || "Mínimo de 8 caracteres",
-      },
-      showPass: false,
+      showPass1: false,
+      showPass2: false,
       logo: "",
     };
   },
   methods: {
-    async handleLogin() {
+    async updatePass() {
       const validation = await this.$refs.form.validate();
       if (validation.valid) {
         try {
           this.error = null;
-          const credentials = {
-            usuario: this.login,
-            senha: this.password,
-          };
-          const response = await ApiService.login(credentials);
-
-          if (response && response.tema) {
-            if (response.tema === "light") store.dispatch("setLight");
-            else store.dispatch("setDark");
-          }
+          await ApiService.updatePass({ usuario: this.email, senha: this.password });
 
           this.$router.push("/interno/dashboard");
         } catch (err) {
@@ -106,8 +91,23 @@ export default {
       }
     },
   },
+  computed: {
+    senhaRules() {
+      return [
+        (v) => !!v || "Senha é obrigatória",
+        (v) => v.length >= 8 || "Mínimo de 8 caracteres",
+      ];
+    },
+    confirmacaoSenhaRules() {
+    return [
+      (v) => !!v || "Confirmação de senha é obrigatória",
+      (v) => v.length >= 8 || "Mínimo de 8 caracteres",
+      (v) => v === this.password || "As senhas devem ser iguais"
+    ];
+  }
+  },
   created() {
-    store.commit("setToken", null);
+    this.email = window.localStorage.getItem('emailVerification');
   },
 };
 </script>

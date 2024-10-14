@@ -101,6 +101,21 @@ class ApiService {
     return response.data;
   }
 
+  async forgotPass(credentials) {
+    const response = await this.client.post('/autenticacao/esqueciMinhaSenha', credentials);
+    return response.data;
+  }
+
+  async verifyCode(dados) {
+    const response = await this.client.post('/autenticacao/verificarCodigo', dados);
+    return response.data;
+  }
+
+  async updatePass(dados) {
+    const response = await this.client.put('/autenticacao/atualizarSenha', dados);
+    return response.data;
+  }
+
   async refreshToken() {
     const authToken = store.state.authToken;
     const response = await this.client.post('/autenticacao/token-atualizacao', authToken);

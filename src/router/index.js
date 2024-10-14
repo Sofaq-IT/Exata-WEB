@@ -2,6 +2,9 @@ import { createRouter, createWebHistory } from 'vue-router';
 import ApiService from '@/plugins/api';
 import Dashboard from '../components/pages/Dashboard.vue';
 import Login from '../components/pages/Login.vue';
+import ForgotPass from '../components/pages/ForgotPass.vue';
+import CodeVerification from '../components/pages/CodeVerification.vue';
+import UpdatePass from '../components/pages/UpdatePass.vue';
 import InternalLayout from '../components/pages/InternalLayout.vue';
 import Profile from '../components/pages/profile/Profile.vue';
 import ProfileCadastro from '../components/pages/profile/ProfileCadastro.vue';
@@ -11,6 +14,9 @@ import UserCadastro from '../components/pages/user/UserCadastro.vue';
 
 const routes = [
   { path: '/login', component: Login, meta: { requiresAuth: false } },
+  { path: '/esqueciMinhaSenha', component: ForgotPass, meta: { requiresAuth: false } },
+  { path: '/verificacaoCodigo', component: CodeVerification, meta: { requiresAuth: false } },
+  { path: '/cadastroSenha', component: UpdatePass, meta: { requiresAuth: false } },
   {
     path: '/interno',
     component: InternalLayout,
