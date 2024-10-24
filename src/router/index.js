@@ -11,6 +11,8 @@ import ProfileCadastro from '../components/pages/profile/ProfileCadastro.vue';
 import ProfilePermission from '../components/pages/profile/ProfilePermission.vue';
 import User from '../components/pages/user/User.vue';
 import UserCadastro from '../components/pages/user/UserCadastro.vue';
+import Customer from '../components/pages/customer/Customer.vue';
+import CustomerCadastro from '../components/pages/customer/CustomerCadastro.vue';
 
 const routes = [
   { path: '/login', component: Login, meta: { requiresAuth: false } },
@@ -27,7 +29,9 @@ const routes = [
       { path: 'usuario/cadastro/:id?', component: UserCadastro, meta: { requiresAuth: true } },
       { path: 'perfil', component: Profile },
       { path: 'perfil/cadastro/:id?', component: ProfileCadastro, meta: { requiresAuth: true } },
-      { path: 'perfil/permissoes/:id?', component: ProfilePermission, meta: { requiresAuth: true } }
+      { path: 'perfil/permissoes/:id?', component: ProfilePermission, meta: { requiresAuth: true } },
+      { path: 'cliente', component: Customer },
+      { path: 'cliente/cadastro/:id?', component: CustomerCadastro, meta: { requiresAuth: true } },
     ],
   },
   // Redirect root to login
