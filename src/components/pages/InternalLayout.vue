@@ -136,7 +136,6 @@ export default {
       mini: true,
       items: [
         { title: "Cliente", icon: "mdi-home-silo-outline", link: "/interno/cliente" },
-        { title: "Perfil", icon: "mdi-account-key", link: "/interno/perfil" },
         {
           title: "Usuários",
           icon: "mdi-account-group",
