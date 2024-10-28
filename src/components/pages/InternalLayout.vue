@@ -135,6 +135,7 @@ export default {
       drawer: false,
       mini: true,
       items: [
+        { title: "Dashboard", icon: "mdi-monitor-dashboard", link: "/interno/dashboard" },
         { title: "Clientes", icon: "mdi-home-group", link: "/interno/cliente" },
         { title: "Empresas", icon: "mdi-home-silo-outline", link: "/interno/empresa" },
         {
