@@ -10,6 +10,8 @@ import User from '../components/pages/user/User.vue';
 import UserCadastro from '../components/pages/user/UserCadastro.vue';
 import Customer from '../components/pages/customer/Customer.vue';
 import CustomerCadastro from '../components/pages/customer/CustomerCadastro.vue';
+import Company from '../components/pages/company/Company.vue';
+import CompanyCadastro from '../components/pages/company/CompanyCadastro.vue';
 
 const routes = [
   { path: '/login', component: Login, meta: { requiresAuth: false } },
@@ -26,6 +28,8 @@ const routes = [
       { path: 'usuario/cadastro/:id?', component: UserCadastro, meta: { requiresAuth: true } },
       { path: 'cliente', component: Customer },
       { path: 'cliente/cadastro/:id?', component: CustomerCadastro, meta: { requiresAuth: true } },
+      { path: 'empresa', component: Company },
+      { path: 'empresa/cadastro/:id?', component: CompanyCadastro, meta: { requiresAuth: true } },
     ],
   },
   // Redirect root to login

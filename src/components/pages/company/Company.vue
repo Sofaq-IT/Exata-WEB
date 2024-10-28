@@ -26,10 +26,10 @@ import router from "@/router";
 import Swal from "sweetalert2";
 import DataTable from "@/components/DataTable.vue";
 import AlertService from "@/plugins/alerts";
-import CustomerService from "@/services/CustomerService";
+import CompanyService from "@/services/CompanyService";
 
 export default {
-  name: "Customer",
+  name: "Company",
   components: {
     DataTable,
   },
@@ -37,7 +37,7 @@ export default {
     return {
       items: [],
       headers: [],
-      title: "Clientes Cadastrados",
+      title: "Empresas Cadastradas",
       paginacaoRequest: {
         pagina: 1,
         registroPorPagina: 5,
@@ -59,9 +59,9 @@ export default {
     };
   },
   methods: {
-    async listCustomers() {
+    async listCompanies() {
       try {
-        const resp = await CustomerService.list(this.paginacaoRequest);
+        const resp = await CompanyService.list(this.paginacaoRequest);
 
         this.paginacaoResponse = JSON.parse(resp.headers["x-paginacao"]);
 
@@ -70,7 +70,7 @@ export default {
           Tipo: x.fisicaJuridica == "F" ? "Física" : "Jurídica",
           "CPF / CNPJ": this.formatCpfCnpj(x.cpfCnpj),
           "Apelido / Nome Fantasia": x.apelidoNomeFantasia,
-          Id: x.clienteID,
+          Id: x.empresaID,
           "Nome / Razão Social": x.nomeRazaoSocial,
           "Data de Cadastro": x.dataCadastroFormatada,
         }));
@@ -84,29 +84,29 @@ export default {
       this.paginacaoRequest.orderCampo = data.orderBy;
       this.paginacaoRequest.orderTipoAsc = data.asc;
       this.paginacaoRequest.ativos = data.status;
-      await this.listCustomers();
+      await this.listCompanies();
     },
     async updateFooter(data) {
       this.paginacaoRequest.pagina = data.page;
       this.paginacaoRequest.registroPorPagina = data.qtyItems;
-      await this.listCustomers();
+      await this.listCompanies();
     },
     async edit(id) {
-      router.push("/interno/cliente/cadastro/" + id);
+      router.push("/interno/empresa/cadastro/" + id);
     },
     async inactivate(id) {
       Swal.fire({
         title: "Você está certo disso?",
-        text: "Deseja realmente excluir esse cliente. Essa operação não poderá ser desfeita.",
+        text: "Deseja realmente excluir essa empresa. Essa operação não poderá ser desfeita.",
         showCancelButton: true,
         confirmButtonText: "Sim, pode seguir",
         cancelButtonText: `Cancelar`,
       }).then(async (result) => {
         if (result.isConfirmed) {
           try {
-            await CustomerService.delete(id);
-            AlertService.sucesso("Cliente removido com sucesso!");
-            await this.listCustomers();
+            await CompanyService.delete(id);
+            AlertService.sucesso("Empresa removido com sucesso!");
+            await this.listCompanies();
           } catch (err) {
             console.log(err);
           }
@@ -114,7 +114,7 @@ export default {
       });
     },
     newReg() {
-      router.push("/interno/cliente/cadastro");
+      router.push("/interno/empresa/cadastro");
     },
     formatCpfCnpj(value) {
       // Remove todos os caracteres não numéricos
@@ -133,9 +133,9 @@ export default {
     },
   },
   async mounted() {
-    await this.listCustomers();
+    await this.listCompanies();
     try {
-      const resp = await CustomerService.getFilterFields();
+      const resp = await CompanyService.getFilterFields();
       this.fields = resp.data;
     } catch (error) {
       console.log(error);
@@ -144,7 +144,7 @@ export default {
 };
 </script>
 
-<style >
+<style scoped>
 table thead,
 tbody tr th,
 td {

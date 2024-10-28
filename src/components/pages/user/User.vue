@@ -158,6 +158,7 @@ export default {
 
         this.items = resp.data.map((x) => ({
           Ativo: x.ativo,
+          Perfil: x.perfil.descricao,
           Nome: x.nome,
           Login: x.userName,
           Email: x.email,

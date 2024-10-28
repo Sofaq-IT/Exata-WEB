@@ -135,7 +135,8 @@ export default {
       drawer: false,
       mini: true,
       items: [
-        { title: "Cliente", icon: "mdi-home-silo-outline", link: "/interno/cliente" },
+        { title: "Clientes", icon: "mdi-home-group", link: "/interno/cliente" },
+        { title: "Empresas", icon: "mdi-home-silo-outline", link: "/interno/empresa" },
         {
           title: "Usuários",
           icon: "mdi-account-group",
