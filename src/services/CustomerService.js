@@ -18,6 +18,10 @@ class CustomerService {
     return await ApiService.get("/cliente?id=" + id);
   }
 
+  async getByCpfCnpj(cpfCnpj) {
+    return await ApiService.get("/cliente/buscar/" + cpfCnpj);
+  }
+
   async update(user) {
     await ApiService.put("/cliente", user);
   }

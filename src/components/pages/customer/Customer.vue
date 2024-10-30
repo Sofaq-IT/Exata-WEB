@@ -8,7 +8,7 @@
           :filters="fields"
           :showSearch="true"
           :footer="paginacaoResponse"
-          :showEdit="true"
+          :showEdit="false"
           :showInactivate="true"
           @updateFilter:filter="updateFilter"
           @updateFooter:fields="updateFooter"

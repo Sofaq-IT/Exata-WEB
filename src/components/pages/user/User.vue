@@ -159,10 +159,10 @@ export default {
         this.items = resp.data.map((x) => ({
           Ativo: x.ativo,
           Perfil: x.perfil.descricao,
+          Empresa: x.empresaID === null ? '-' : x.empresa.apelidoNomeFantasia,
+          Cliente: x.clienteID === null ? '-' : x.cliente.apelidoNomeFantasia,
           Nome: x.nome,
           Login: x.userName,
-          Email: x.email,
-          Celular: x.phoneNumber,
           Id: x.id,
         }));
       } catch (error) {

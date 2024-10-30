@@ -16,7 +16,7 @@
         <v-list dense>
           <v-list-item
             link
-            v-for="item in items"
+            v-for="item in items.filter(x => x.permissions.indexOf(this.perfilID) >= 0)"
             :key="item.title"
             @click="navigate(item.link)"
             class="menu-item"
@@ -34,6 +34,7 @@
         <v-list-item>
           <v-list-item-content>
             <v-app-bar-nav-icon
+              color="blue"
               @click.stop="
                 drawer = true;
                 mini = false;
@@ -46,13 +47,13 @@
         <v-list dense>
           <v-list-item
             link
-            v-for="item in items"
+            v-for="item in items.filter(x => x.permissions.indexOf(this.perfilID) >= 0)"
             :key="item.title"
             @click="navigate(item.link)"
             class="menu-item"
           >
             <template v-slot:prepend>
-              <v-icon :icon="item.icon"></v-icon>
+              <v-icon :icon="item.icon" color="blue"></v-icon>
               <v-tooltip activator="parent" location="right">{{
                 item.title
               }}</v-tooltip>
@@ -135,18 +136,35 @@ export default {
       drawer: false,
       mini: true,
       items: [
-        { title: "Dashboard", icon: "mdi-monitor-dashboard", link: "/interno/dashboard" },
-        { title: "Clientes", icon: "mdi-home-group", link: "/interno/cliente" },
-        { title: "Empresas", icon: "mdi-home-silo-outline", link: "/interno/empresa" },
+        {
+          title: "Dashboard",
+          icon: "mdi-monitor-dashboard",
+          link: "/interno/dashboard",
+          permissions: [0, 1, 2, 3],
+        },
+        {
+          title: "Clientes",
+          icon: "mdi-home-group",
+          link: "/interno/cliente",
+          permissions: [0, 2],
+        },
+        {
+          title: "Empresas",
+          icon: "mdi-home-silo-outline",
+          link: "/interno/empresa",
+          permissions: [0, 1],
+        },
         {
           title: "Usuários",
           icon: "mdi-account-group",
           link: "/interno/usuario",
-        }
+          permissions: [0, 1],
+        },
       ],
       dadosCadastrais: false,
       showUpdatePassword: false,
       logo: "",
+      perfilID: null,
     };
   },
   methods: {
@@ -174,8 +192,10 @@ export default {
     ...mapState(["isDark"]),
   },
   mounted() {
-    if (store.state.authToken.avatar)
-      this.logo = "data:image/png;base64," + store.state.authToken.avatar;
+    this.perfilID = store.state.authToken.perfilID;      
+    if (store.state.authToken.avatar) {
+      this.logo = "data:image/png;base64," + store.state.authToken.avatar;      
+    }
   },
 };
 </script>
