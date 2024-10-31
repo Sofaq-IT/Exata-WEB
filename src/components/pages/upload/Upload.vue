@@ -68,10 +68,10 @@
                   color="success"
                   size="small"
                   variant="outlined"
-                  @click="processarUpload(item.id)"
+                  @click="visualizarDetalhes(item.uploadID)"
                 >
-                  Processar
-                  <v-icon icon="mdi-file-check" end></v-icon>
+                  Visualizar
+                  <v-icon icon="mdi-magnify" end></v-icon>
                 </v-btn>
               </td>
             </tr>
@@ -154,7 +154,9 @@
                 >
                   <template v-slot:item="{ item }">
                     <tr>
-                      <td v-for="header in uploadHeaders" :key="header">{{ item[header] }}</td>
+                      <td v-for="header in uploadHeaders" :key="header">
+                        {{ item[header] }}
+                      </td>
                     </tr>
                   </template>
                 </v-data-table>
@@ -178,6 +180,27 @@
       </v-card-text>
     </v-card>
   </v-dialog>
+  <v-dialog v-model="showDetalhes">
+    <v-card>
+      <v-card-title>Detalhes da Importação</v-card-title>
+      <v-card-text>
+        <v-data-table
+          :headers="headersUpload"
+          :items="dadosImportados"
+          class="elevation-1"
+          :items-per-page="-1"
+        >
+          <template v-slot:item="{ item }">
+            <tr>
+              <td v-for="header in uploadHeaders" :key="header">
+                {{ item[header] }}
+              </td>
+            </tr>
+          </template>
+        </v-data-table>
+      </v-card-text>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script>
@@ -196,6 +219,7 @@ export default {
   data() {
     return {
       showCadastro: false,
+      showDetalhes: false,
       executingUpload: false,
       step: 1,
       file: null,
@@ -214,7 +238,7 @@ export default {
         { title: "Data Cadastro" },
         { title: "Ações" },
       ],
-      uploadHeaders:[]
+      uploadHeaders: [],
     };
   },
   methods: {
@@ -262,7 +286,7 @@ export default {
             }
           );
 
-          this.uploadHeaders = Object.keys(response.data[0]);          
+          this.uploadHeaders = Object.keys(response.data[0]);
           this.dadosImportados = response.data;
           this.step = 2;
           this.executingUpload = false;
@@ -273,10 +297,20 @@ export default {
         }
       }
     },
+    async visualizarDetalhes(uploadID) {
+      try {
+        const resp = await UploadService.details(uploadID);
+        this.dadosImportados = resp.data;
+        this.uploadHeaders = Object.keys(resp.data[0]);
+        this.showDetalhes = true;
+      } catch (error) {
+        console.log(error);
+      }
+    },
   },
   async mounted() {
     await this.listUploads();
     await this.listCustomers();
-  }
+  },
 };
 </script>
