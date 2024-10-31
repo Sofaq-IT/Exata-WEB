@@ -10,6 +10,10 @@ class CustomerService {
     )
   };
 
+  async listAll() {
+    return await ApiService.get("/cliente/listarTodos");
+  }
+
   async delete(id) {
     await ApiService.delete("/cliente?id=" + id);
   }

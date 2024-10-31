@@ -8,8 +8,9 @@
             variant="outlined"
             color="secondary"
             @click="newReg"
-            >Novo Cadastro</v-btn
-          >
+            size="small"
+            >Novo Cadastro<v-icon icon="mdi-plus-thick" end></v-icon
+          ></v-btn>
         </v-col>
       </v-row>
     </v-card-title>
@@ -119,9 +120,9 @@ export default {
     permissions(id) {
       this.$emit("permissions:id", id);
     },
-    newReg(){
+    newReg() {
       this.$emit("newReg");
-    }
+    },
   },
   computed: {
     keys() {
@@ -136,6 +137,7 @@ export default {
 
       h.push({ title: "Ações" });
 
+      console.log(h);
       return h;
     },
   },

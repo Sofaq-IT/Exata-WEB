@@ -12,6 +12,7 @@ import Customer from '../components/pages/customer/Customer.vue';
 import CustomerCadastro from '../components/pages/customer/CustomerCadastro.vue';
 import Company from '../components/pages/company/Company.vue';
 import CompanyCadastro from '../components/pages/company/CompanyCadastro.vue';
+import Upload from '../components/pages/upload/Upload.vue';
 
 const routes = [
   { path: '/login', component: Login, meta: { requiresAuth: false } },
@@ -30,6 +31,7 @@ const routes = [
       { path: 'cliente/cadastro/:id?', component: CustomerCadastro, meta: { requiresAuth: true } },
       { path: 'empresa', component: Company },
       { path: 'empresa/cadastro/:id?', component: CompanyCadastro, meta: { requiresAuth: true } },
+      { path: 'upload', component: Upload },
     ],
   },
   // Redirect root to login

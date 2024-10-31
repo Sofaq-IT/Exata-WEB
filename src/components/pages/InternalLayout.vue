@@ -155,6 +155,12 @@ export default {
           permissions: [0, 1],
         },
         {
+          title: "Importação de Resultados",
+          icon: "mdi-upload",
+          link: "/interno/upload",
+          permissions: [0, 2],
+        },
+        {
           title: "Usuários",
           icon: "mdi-account-group",
           link: "/interno/usuario",
