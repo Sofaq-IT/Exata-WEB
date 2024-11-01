@@ -8,7 +8,7 @@
           :filters="fields"
           :showSearch="true"
           :footer="paginacaoResponse"
-          :showEdit="false"
+          :showEdit="enableEdit"
           :showInactivate="true"
           @updateFilter:filter="updateFilter"
           @updateFooter:fields="updateFooter"
@@ -22,6 +22,7 @@
 </template>
 
 <script>
+import store from "@/plugins/store";
 import router from "@/router";
 import Swal from "sweetalert2";
 import DataTable from "@/components/DataTable.vue";
@@ -35,6 +36,7 @@ export default {
   },
   data() {
     return {
+      enableEdit: false,
       items: [],
       headers: [],
       title: "Clientes Cadastrados",
@@ -67,6 +69,12 @@ export default {
 
         this.items = resp.data.map((x) => ({
           Ativo: x.ativo,
+          Plano:
+            x.plano === 1
+              ? "Básico"
+              : x.plano === 2
+              ? "Intermediário"
+              : "Avançado",
           Tipo: x.fisicaJuridica == "F" ? "Física" : "Jurídica",
           "CPF / CNPJ": this.formatCpfCnpj(x.cpfCnpj),
           "Apelido / Nome Fantasia": x.apelidoNomeFantasia,
@@ -133,6 +141,8 @@ export default {
     },
   },
   async mounted() {
+    if (store.state.authToken.perfilID === 1) this.enableEdit = true;
+
     await this.listCustomers();
     try {
       const resp = await CustomerService.getFilterFields();

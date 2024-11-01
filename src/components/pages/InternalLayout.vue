@@ -146,7 +146,7 @@ export default {
           title: "Clientes",
           icon: "mdi-home-group",
           link: "/interno/cliente",
-          permissions: [0, 2],
+          permissions: [0, 1, 2],
         },
         {
           title: "Empresas",

@@ -36,6 +36,19 @@
               @blur="consultaPorCpfCnpj"
             ></v-text-field>
           </v-col>
+          <v-col cols="12" md="4">
+            <v-select
+              :items="planos"
+              item-title="descricao"
+              item-value="id"
+              v-model="cliente.plano"
+              placeholder="Selecione um plano"
+              :rules="requiredRules"
+              label="Plano"
+              :disabled="perfilID !== 1"
+            >
+            </v-select>
+          </v-col>
         </v-row>
         <v-row>
           <v-col cols="12" md="4">
@@ -162,6 +175,7 @@
 </template>
 
 <script>
+import store from "@/plugins/store";
 import AlertService from "@/plugins/alerts";
 import CustomerService from "@/services/CustomerService";
 import ViaCepService from "@/services/ViaCepService";
@@ -169,6 +183,7 @@ export default {
   name: "Customer",
   data() {
     return {
+      perfilID: 0,
       cliente: {
         clienteID: 0,
         fisicaJuridica: "F",
@@ -185,6 +200,7 @@ export default {
         cidade: "",
         estado: "",
         ativo: true,
+        plano: 1
       },
       rules: {
         required: (value) => !!value || "Este campo é obrigatório",
@@ -193,9 +209,15 @@ export default {
         (value) => !!value || "Este campo é obrigatório",
         (value) => /.+@.+\..+/.test(value) || "E-mail inválido",
       ],
+      planos: [
+        { id: 1, descricao: "Básico" },
+        { id: 2, descricao: "Intermediário" },
+        { id: 3, descricao: "Avançado" },
+      ],
     };
   },
   async created() {
+    this.perfilID = store.state.authToken.perfilID;
     this.cliente.clienteID = this.$route.params.id ? this.$route.params.id : 0;
     if (this.cliente.clienteID) {
       await this.carregarDadosCliente();
@@ -284,6 +306,7 @@ export default {
             cidade: "",
             estado: "",
             ativo: true,
+            plano: 1
           };
         }
       } catch (err) {
