@@ -100,14 +100,22 @@
                           :items="clientes"
                           item-title="apelidoNomeFantasia"
                           item-value="clienteID"
-                          v-model="clienteSelecionado"
+                          v-model="upload.clienteID"
                           placeholder="Selecione um cliente"
                           :rules="requiredRules"
                           label="Cliente"
                         >
                         </v-select>
                       </v-col>
-                      <v-col cols="12" md="8">
+                      <v-col cols="12" md="4">
+                        <v-text-field
+                          v-model="upload.dataReferencia"
+                          label="Data de Referência"
+                          v-mask="'##/##/####'"
+                          :rules="requiredRules"
+                        ></v-text-field>
+                      </v-col>
+                      <v-col cols="12" md="4">
                         <v-file-input
                           v-model="file"
                           label="Faça upload aqui do arquivo que deseja importar"
@@ -226,7 +234,10 @@ export default {
       dadosImportados: [],
       requiredRules: [(v) => !!v || "Campo obrigatório"],
       clientes: [],
-      clienteSelecionado: null,
+      upload: {
+        clienteID: null,
+        dataReferencia: ''
+      },
       uploads: [],
       headers: [
         { title: "Cliente" },
@@ -271,13 +282,13 @@ export default {
         this.executingUpload = true;
         const formData = new FormData();
         formData.append("file", this.file);
+        formData.append("uploadDTO", JSON.stringify(this.upload));
 
         try {
           const response = await axios.post(
             import.meta.env.VITE_API_URL +
-              "/upload/importarArquivo/" +
-              this.clienteSelecionado,
-            formData,
+              "/upload/importarArquivo/",
+              formData,
             {
               headers: {
                 "Content-Type": "multipart/form-data",
