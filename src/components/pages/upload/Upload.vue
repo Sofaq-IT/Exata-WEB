@@ -108,12 +108,15 @@
                         </v-select>
                       </v-col>
                       <v-col cols="12" md="4">
-                        <v-text-field
+                        <v-date-input
+                          readonly
                           v-model="upload.dataReferencia"
                           label="Data de Referência"
+                          prepend-icon=""
+                          prepend-inner-icon="$calendar"
                           v-mask="'##/##/####'"
                           :rules="requiredRules"
-                        ></v-text-field>
+                        ></v-date-input>
                       </v-col>
                       <v-col cols="12" md="4">
                         <v-file-input
@@ -212,6 +215,7 @@
 </template>
 
 <script>
+import { VDateInput } from 'vuetify/labs/VDateInput'
 import axios from "axios";
 import store from "@/plugins/store";
 import AlertService from "@/plugins/alerts";
@@ -223,6 +227,7 @@ export default {
   name: "Upload",
   components: {
     DataTable,
+    VDateInput
   },
   data() {
     return {
@@ -236,7 +241,7 @@ export default {
       clientes: [],
       upload: {
         clienteID: null,
-        dataReferencia: ''
+        dataReferencia: null,
       },
       uploads: [],
       headers: [
@@ -286,9 +291,8 @@ export default {
 
         try {
           const response = await axios.post(
-            import.meta.env.VITE_API_URL +
-              "/upload/importarArquivo/",
-              formData,
+            import.meta.env.VITE_API_URL + "/upload/importarArquivo/",
+            formData,
             {
               headers: {
                 "Content-Type": "multipart/form-data",

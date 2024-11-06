@@ -27,6 +27,11 @@ const vuetify = createVuetify({
       },
     },
   },
+  date: {
+    locale: {
+      en: 'pt-BR',
+    }
+  }
 })
 
 store.watch(
