@@ -306,9 +306,9 @@ export default {
           this.step = 2;
           this.executingUpload = false;
         } catch (error) {
-          AlertService.erro("Ocorreu um erro: " + error.message);
-
+          AlertService.erro(error.response.data);
           this.executingUpload = false;
+          this.closeUpload();
         }
       }
     },
