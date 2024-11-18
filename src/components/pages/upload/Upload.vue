@@ -63,29 +63,56 @@
               <td>{{ item.dataCadastroFormatada }}</td>
               <td>
                 <v-row>
-                  <v-col cols="12" v-if="[0,1].indexOf(item.statusAtual) >= 0">
-                    <v-btn                      
-                      class="ma-2"
-                      color="success"
-                      size="small"
-                      variant="outlined"
-                      @click="visualizarDetalhes(item.uploadID)"
-                    >
-                      Visualizar
-                      <v-icon icon="mdi-magnify" end></v-icon>
-                    </v-btn>
-                  </v-col>
-                  <v-col cols="12" v-if="item.statusAtual === 0">
-                    <v-btn                      
-                      class="ma-2"
-                      color="warning"
-                      size="small"
-                      variant="outlined"
-                      @click="processarArquivo(item.uploadID)"
-                    >
-                      Processar
-                      <v-icon icon="mdi-sync" end></v-icon>
-                    </v-btn>
+                  <v-col>
+                    <v-tooltip>
+                      <template #activator="{ props }">
+                        <v-btn
+                          v-if="[0, 1].indexOf(item.statusAtual) >= 0"
+                          class="ma-2"
+                          color="success"
+                          size="small"
+                          variant="outlined"
+                          v-bind="props"
+                          @click="visualizarDetalhes(item.uploadID)"
+                        >
+                          <v-icon icon="mdi-magnify"></v-icon>
+                        </v-btn>
+                      </template>
+                      <span>Visualizar Dados Importados</span>
+                    </v-tooltip>
+
+                    <v-tooltip>
+                      <template #activator="{ props }">
+                        <v-btn
+                          v-if="[0, 1].indexOf(item.statusAtual) >= 0"
+                          class="ma-2"
+                          color="warning"
+                          size="small"
+                          variant="outlined"
+                          v-bind="props"
+                        >
+                          <v-icon icon="mdi-paperclip"></v-icon>
+                        </v-btn>
+                      </template>
+                      <span>Outros Anexos</span>
+                    </v-tooltip>
+
+                    <v-tooltip>
+                      <template #activator="{ props }">
+                        <v-btn
+                          v-if="item.statusAtual === 0"
+                          class="ma-2"
+                          color="secondary"
+                          size="small"
+                          variant="outlined"
+                          v-bind="props"
+                          @click="processarArquivo(item.uploadID)"
+                        >
+                          <v-icon icon="mdi-sync"></v-icon>
+                        </v-btn>
+                      </template>
+                      <span>Processar Arquivo</span>
+                    </v-tooltip>
                   </v-col>
                 </v-row>
               </td>
@@ -96,115 +123,194 @@
     </v-row>
   </v-card>
   <v-dialog v-model="showCadastro">
-    <v-card>
-      <v-card-title>Nova Importação</v-card-title>
-      <v-card-text>
-        <v-stepper
-          hide-actions
-          v-model="step"
-          :items="['Passo 1 - Upload', 'Passo 2 - Dados Importados']"
-        >
-          <template v-slot:item.1>
-            <v-card flat>
-              <v-form ref="formUpload">
-                <v-card flat>
-                  <v-card-text>
-                    <v-row>
-                      <v-col cols="12" md="4">
-                        <v-select
-                          :items="clientes"
-                          item-title="apelidoNomeFantasia"
-                          item-value="clienteID"
-                          v-model="upload.clienteID"
-                          placeholder="Selecione um cliente"
-                          :rules="requiredRules"
-                          label="Cliente"
-                        >
-                        </v-select>
-                      </v-col>
-                      <v-col cols="12" md="4">
-                        <v-date-input
-                          readonly
-                          v-model="upload.dataReferencia"
-                          label="Data de Referência"
-                          prepend-icon=""
-                          prepend-inner-icon="$calendar"
-                          v-mask="'##/##/####'"
-                          :rules="requiredRules"
-                        ></v-date-input>
-                      </v-col>
-                      <v-col cols="12" md="4">
-                        <v-file-input
-                          v-model="file"
-                          label="Faça upload aqui do arquivo que deseja importar"
-                          prepend-icon="mdi-upload"
-                          outlined
-                          show-size
-                          placeholder="Nenhum arquivo selecionado"
-                          :rules="requiredRules"
-                        ></v-file-input>
-                      </v-col>
-                    </v-row>
-                  </v-card-text>
-                  <v-card-actions>
-                    <v-spacer></v-spacer>
+    <v-form ref="formUpload">
+      <v-card>
+        <v-card-title>Nova Importação</v-card-title>
+        <v-card-text>
+          <v-stepper
+            hide-actions
+            v-model="step"
+            :items="[
+              'Passo 1 - Upload',
+              'Passo 2 - Dados Importados',
+              'Passo 3 - Outros Anexos',
+            ]"
+          >
+            <template v-slot:item.1>
+              <v-card flat>
+                <v-form ref="formValidacao">
+                  <v-card flat>
+                    <v-card-text>
+                      <v-row>
+                        <v-col cols="12" md="4">
+                          <v-select
+                            :items="clientes"
+                            item-title="apelidoNomeFantasia"
+                            item-value="clienteID"
+                            v-model="upload.clienteID"
+                            placeholder="Selecione um cliente"
+                            :rules="requiredRules"
+                            label="Cliente"
+                          >
+                          </v-select>
+                        </v-col>
+                        <v-col cols="12" md="4">
+                          <v-date-input
+                            readonly
+                            v-model="upload.dataReferencia"
+                            label="Data de Referência"
+                            prepend-icon=""
+                            prepend-inner-icon="$calendar"
+                            v-mask="'##/##/####'"
+                            :rules="requiredRules"
+                          ></v-date-input>
+                        </v-col>
+                        <v-col cols="12" md="4">
+                          <v-file-input
+                            v-model="file"
+                            label="Faça upload aqui do arquivo que deseja importar"
+                            prepend-icon="mdi-upload"
+                            outlined
+                            show-size
+                            placeholder="Nenhum arquivo selecionado"
+                            :rules="requiredRules"
+                          ></v-file-input>
+                        </v-col>
+                      </v-row>
+                    </v-card-text>
+                    <v-card-actions>
+                      <v-spacer></v-spacer>
 
-                    <!-- Botão Next alinhado à direita -->
-                    <v-btn
-                      outlined
-                      color="blue"
-                      @click="validarUpload"
-                      :disabled="!file || executingUpload"
-                    >
-                      <v-icon right>mdi-arrow-right</v-icon>
-                    </v-btn>
-                  </v-card-actions>
-                </v-card>
-              </v-form>
-              <v-progress-linear
-                color="cyan"
-                indeterminate
-                v-if="executingUpload"
-              ></v-progress-linear>
-            </v-card>
-          </template>
+                      <!-- Botão Next alinhado à direita -->
+                      <v-btn
+                        outlined
+                        color="blue"
+                        @click="validarUpload"
+                        :disabled="!file || executingUpload"
+                      >
+                        <v-icon right>mdi-arrow-right</v-icon>
+                      </v-btn>
+                    </v-card-actions>
+                  </v-card>
+                </v-form>
+                <v-progress-linear
+                  color="cyan"
+                  indeterminate
+                  v-if="executingUpload"
+                ></v-progress-linear>
+              </v-card>
+            </template>
 
-          <template v-slot:item.2>
-            <v-card flat>
-              <v-card-text>
-                <v-data-table
-                  :headers="headersUpload"
-                  :items="dadosImportados"
-                  class="elevation-1"
-                  :items-per-page="-1"
-                >
-                  <template v-slot:item="{ item }">
-                    <tr>
-                      <td v-for="header in uploadHeaders" :key="header">
-                        {{ item[header] }}
-                      </td>
-                    </tr>
-                  </template>
-                </v-data-table>
-              </v-card-text>
-              <v-card-actions>
-                <!-- Botão Back alinhado à esquerda -->
-                <v-btn outlined color="blue" @click="step = 1">
-                  <v-icon left>mdi-arrow-left</v-icon>
-                </v-btn>
+            <template v-slot:item.2>
+              <v-card flat>
+                <v-card-text>
+                  <v-data-table
+                    :headers="headersUpload"
+                    :items="dadosImportados"
+                    class="elevation-1"
+                    :items-per-page="-1"
+                  >
+                    <template v-slot:item="{ item }">
+                      <tr>
+                        <td v-for="header in uploadHeaders" :key="header">
+                          {{ item[header] }}
+                        </td>
+                      </tr>
+                    </template>
+                  </v-data-table>
+                </v-card-text>
+                <v-card-actions>
+                  <!-- Botão Back alinhado à esquerda -->
+                  <v-btn outlined color="blue" @click="step = 1">
+                    <v-icon left>mdi-arrow-left</v-icon>
+                  </v-btn>
 
-                <v-spacer></v-spacer>
+                  <v-spacer></v-spacer>
 
-                <!-- Botão Next alinhado à direita -->
-                <v-btn outlined color="blue" @click="closeUpload">
+                  <!-- Botão Next alinhado à direita -->
+                  <v-btn
+                    outlined
+                    color="blue"
+                    @click="step = 3"
+                    :disabled="!file || executingUpload"
+                  >
+                    <v-icon right>mdi-arrow-right</v-icon>
+                  </v-btn>
+
+                  <!-- <v-btn outlined color="blue" @click="closeUpload">
                   FINALIZAR PROCESSO
-                </v-btn>
-              </v-card-actions>
-            </v-card>
-          </template>
-        </v-stepper>
-      </v-card-text>
-    </v-card>
+                </v-btn> -->
+                </v-card-actions>
+              </v-card>
+            </template>
+
+            <template v-slot:item.3>
+              <v-card flat>
+                <v-card-title>Outros Anexos</v-card-title>
+                <v-card-text>
+                  <v-divider></v-divider>
+                  <v-alert type="info" border="start" elevation="2" class="mt-5" v-if="countAttachments === 0">
+                    Não há nenhuma arquivo extra anexado. Para incluir, basta clicar no botão "Novo Anexo abaixo.
+                  </v-alert>
+                  <v-row
+                    v-for="(at, index) in countAttachments"
+                    :key="at"
+                    class="mt-5"
+                  >
+                    <v-col cols="10">
+                      <v-file-input
+                        v-model="attachments[index]"
+                        label="Faça upload aqui do arquivo que deseja importar"
+                        prepend-icon="mdi-upload"
+                        outlined
+                        show-size
+                        placeholder="Nenhum arquivo selecionado"
+                        :rules="requiredRules"
+                      ></v-file-input>
+                    </v-col>
+                    <v-col cols="2" v-if="index > 0">
+                      <v-btn
+                        class="ma-2"
+                        color="error"
+                        variant="outlined"
+                        @click="countAttachments--"
+                      >
+                        <v-icon icon="mdi-delete"></v-icon>
+                      </v-btn>
+                    </v-col>
+                  </v-row>
+                  <v-divider></v-divider>
+                  <v-row class="mt-5">
+                    <v-col cols="12">
+                      <v-btn
+                        variant="outlined"
+                        color="secondary"
+                        size="small"
+                        @click="countAttachments++"
+                        >Novo Anexo<v-icon icon="mdi-paperclip" end></v-icon
+                      ></v-btn>
+                    </v-col>
+                  </v-row>
+                </v-card-text>
+                <v-card-actions>
+                  <!-- Botão Back alinhado à esquerda -->
+                  <v-btn outlined color="blue" @click="step = 2">
+                    <v-icon left>mdi-arrow-left</v-icon>
+                  </v-btn>
+
+                  <v-spacer></v-spacer>
+
+                  <!-- Botão Next alinhado à direita -->
+                  <v-btn outlined color="blue" @click="encerrarProcesso">
+                    FINALIZAR PROCESSO
+                  </v-btn>
+                </v-card-actions>
+              </v-card>
+            </template>
+          </v-stepper>
+        </v-card-text>
+      </v-card>
+    </v-form>
   </v-dialog>
   <v-dialog v-model="showDetalhes">
     <v-card>
@@ -251,6 +357,8 @@ export default {
       executingUpload: false,
       step: 1,
       file: null,
+      countAttachments: 0,
+      attachments: [],
       dadosImportados: [],
       requiredRules: [(v) => !!v || "Campo obrigatório"],
       clientes: [],
@@ -297,16 +405,16 @@ export default {
       this.listUploads();
     },
     async validarUpload() {
-      const validation = await this.$refs.formUpload.validate();
+      const validation = await this.$refs.formValidacao.validate();
       if (validation.valid) {
         this.executingUpload = true;
         const formData = new FormData();
         formData.append("file", this.file);
-        formData.append("uploadDTO", JSON.stringify(this.upload));
+        // formData.append("uploadDTO", JSON.stringify(this.upload));
 
         try {
           const response = await axios.post(
-            import.meta.env.VITE_API_URL + "/upload/importarArquivo/",
+            import.meta.env.VITE_API_URL + "/upload/validarArquivo/",
             formData,
             {
               headers: {
@@ -339,14 +447,45 @@ export default {
     },
     async processarArquivo(uploadID) {
       try {
-        await UploadService.process(uploadID).then(() =>{
+        await UploadService.process(uploadID).then(() => {
           this.listUploads();
-          AlertService.sucesso('Arquivo Processado com Sucesso!');
+          AlertService.sucesso("Arquivo Processado com Sucesso!");
         });
-        
       } catch (error) {
         console.log(error);
         AlertService.erro(error.response.data);
+      }
+    },
+    async encerrarProcesso() {
+      const validation = await this.$refs.formUpload.validate();
+      if (validation.valid) {
+        this.executingUpload = true;
+        const formData = new FormData();
+        formData.append("file", this.file);
+        formData.append("uploadDTO", JSON.stringify(this.upload));
+        this.attachments.forEach((file) => {
+          formData.append("attachments", file);
+        });
+
+        try {
+          await axios.post(
+            import.meta.env.VITE_API_URL + "/upload/importarArquivo/",
+            formData,
+            {
+              headers: {
+                "Content-Type": "multipart/form-data",
+                Authorization: "Bearer " + store.state.authToken.token,
+              },
+            }
+          );
+
+          this.executingUpload = false;
+          this.closeUpload();
+        } catch (error) {
+          AlertService.erro(error.response.data);
+          this.executingUpload = false;
+          this.closeUpload();
+        }
       }
     },
   },
