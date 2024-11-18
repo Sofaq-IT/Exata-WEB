@@ -90,6 +90,7 @@
                           size="small"
                           variant="outlined"
                           v-bind="props"
+                          @click="listarAnexos(item.uploadID)"
                         >
                           <v-icon icon="mdi-paperclip"></v-icon>
                         </v-btn>
@@ -249,8 +250,15 @@
                 <v-card-title>Outros Anexos</v-card-title>
                 <v-card-text>
                   <v-divider></v-divider>
-                  <v-alert type="info" border="start" elevation="2" class="mt-5" v-if="countAttachments === 0">
-                    Não há nenhuma arquivo extra anexado. Para incluir, basta clicar no botão "Novo Anexo abaixo.
+                  <v-alert
+                    type="info"
+                    border="start"
+                    elevation="2"
+                    class="mt-5"
+                    v-if="countAttachments === 0"
+                  >
+                    Não há nenhuma arquivo extra anexado. Para incluir, basta
+                    clicar no botão "Novo Anexo abaixo.
                   </v-alert>
                   <v-row
                     v-for="(at, index) in countAttachments"
@@ -333,6 +341,31 @@
       </v-card-text>
     </v-card>
   </v-dialog>
+  <v-dialog v-model="showAnexos">
+    <v-card>
+      <v-card-title>Outros Anexos</v-card-title>
+      <v-card-text>
+        <div
+          v-for="attach in attachmentsList"
+          :key="attach.uploadID"
+        >
+          <v-divider></v-divider>
+          <v-row class="mt-5 mb-5">
+            <v-col cols="10">{{ attach.nomeArquivoEntrada }}</v-col>
+            <v-col cols="2">
+              <v-btn
+                variant="outlined"
+                color="secondary"
+                size="small"
+                :href="attach.urlStorage"
+                >Baixar<v-icon icon="mdi-download" end></v-icon
+              ></v-btn>
+            </v-col>
+          </v-row>
+        </div>
+      </v-card-text>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script>
@@ -354,6 +387,7 @@ export default {
     return {
       showCadastro: false,
       showDetalhes: false,
+      showAnexos: false,
       executingUpload: false,
       step: 1,
       file: null,
@@ -378,6 +412,7 @@ export default {
         { title: "Ações" },
       ],
       uploadHeaders: [],
+      attachmentsList: [],
     };
   },
   methods: {
@@ -486,6 +521,17 @@ export default {
           this.executingUpload = false;
           this.closeUpload();
         }
+      }
+    },
+    async listarAnexos(uploadID) {
+      try {
+        await UploadService.listAttachments(uploadID).then((resp) => {
+          this.attachmentsList = resp.data;
+          this.showAnexos = true;
+        });
+      } catch (error) {
+        console.log(error);
+        AlertService.erro(error.response.data);
       }
     },
   },

@@ -13,6 +13,10 @@ class UploadService {
   async process(uploadID) {
     return await ApiService.get("/upload/processar/" + uploadID);
   };
+
+  async listAttachments(uploadID) {
+    return await ApiService.get("/upload/listarAnexos/" + uploadID);
+  };
 }
 
 export default new UploadService();
