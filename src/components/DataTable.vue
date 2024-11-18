@@ -27,6 +27,7 @@
       class="elevation-1"
       hide-default-footer
       no-data-text="Sem registros para exibir"
+      items-per-page="-1"
     >
       <template v-slot:item="{ item }">
         <tr>
@@ -136,8 +137,6 @@ export default {
         }));
 
       h.push({ title: "Ações" });
-
-      console.log(h);
       return h;
     },
   },
