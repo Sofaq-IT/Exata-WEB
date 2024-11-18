@@ -38,7 +38,7 @@
         >
           <template v-slot:item="{ item }">
             <tr>
-              <td>{{ item.cliente.apelidoNomeFantasia }}</td>
+              <td>{{ item.amostra.cliente.apelidoNomeFantasia }}</td>
               <td>{{ item.nomeArquivoEntrada }}</td>
               <td>
                 <a :href="item.urlStorage">
@@ -62,17 +62,32 @@
               </td>
               <td>{{ item.dataCadastroFormatada }}</td>
               <td>
-                <v-btn
-                  v-if="item.statusAtual === 0"
-                  class="ma-2"
-                  color="success"
-                  size="small"
-                  variant="outlined"
-                  @click="visualizarDetalhes(item.uploadID)"
-                >
-                  Visualizar
-                  <v-icon icon="mdi-magnify" end></v-icon>
-                </v-btn>
+                <v-row>
+                  <v-col cols="12" v-if="[0,1].indexOf(item.statusAtual) >= 0">
+                    <v-btn                      
+                      class="ma-2"
+                      color="success"
+                      size="small"
+                      variant="outlined"
+                      @click="visualizarDetalhes(item.uploadID)"
+                    >
+                      Visualizar
+                      <v-icon icon="mdi-magnify" end></v-icon>
+                    </v-btn>
+                  </v-col>
+                  <v-col cols="12" v-if="item.statusAtual === 0">
+                    <v-btn                      
+                      class="ma-2"
+                      color="warning"
+                      size="small"
+                      variant="outlined"
+                      @click="processarArquivo(item.uploadID)"
+                    >
+                      Processar
+                      <v-icon icon="mdi-sync" end></v-icon>
+                    </v-btn>
+                  </v-col>
+                </v-row>
               </td>
             </tr>
           </template>
@@ -215,7 +230,7 @@
 </template>
 
 <script>
-import { VDateInput } from 'vuetify/labs/VDateInput'
+import { VDateInput } from "vuetify/labs/VDateInput";
 import axios from "axios";
 import store from "@/plugins/store";
 import AlertService from "@/plugins/alerts";
@@ -227,7 +242,7 @@ export default {
   name: "Upload",
   components: {
     DataTable,
-    VDateInput
+    VDateInput,
   },
   data() {
     return {
@@ -320,6 +335,18 @@ export default {
         this.showDetalhes = true;
       } catch (error) {
         console.log(error);
+      }
+    },
+    async processarArquivo(uploadID) {
+      try {
+        await UploadService.process(uploadID).then(() =>{
+          this.listUploads();
+          AlertService.sucesso('Arquivo Processado com Sucesso!');
+        });
+        
+      } catch (error) {
+        console.log(error);
+        AlertService.erro(error.response.data);
       }
     },
   },

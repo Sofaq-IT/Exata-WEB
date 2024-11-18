@@ -9,6 +9,10 @@ class UploadService {
   async details(uploadID) {
     return await ApiService.get("/upload/detalhes/" + uploadID);
   };
+
+  async process(uploadID) {
+    return await ApiService.get("/upload/processar/" + uploadID);
+  };
 }
 
 export default new UploadService();
