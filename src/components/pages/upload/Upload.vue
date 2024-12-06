@@ -4,7 +4,7 @@
       <v-row>
         <v-col cols="12">
           <a
-            href="https://pontualmainstorage.blob.core.windows.net/exata/exata-modelo-importacao.xlsx"
+            href="https://exatastorage.blob.core.windows.net/exata/uploads-realizados/exata-modelo-importacao.xlsx"
           >
             <v-btn variant="outlined" color="grey" size="small">
               Arquivo padrão para Download
