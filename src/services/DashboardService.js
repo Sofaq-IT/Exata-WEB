@@ -2,6 +2,10 @@ import ApiService from '../plugins/api';
 
 class DashboardService {
 
+  async getDashboard(param) {
+    return await ApiService.post("/dashboard", param);
+  }
+
   async getFazendas(param) {
     return await ApiService.post("/dashboard/getFazendas", param);
   }

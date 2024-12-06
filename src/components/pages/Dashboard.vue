@@ -1,21 +1,19 @@
 <template>
   <v-container>
-    <v-expansion-panels v-model="painelAberto">
+    <v-expansion-panels v-model="painelAberto" class="mb-5">
       <v-expansion-panel>
         <v-expansion-panel-title>
           <h3>Filtros e Agrupamentos</h3>
         </v-expansion-panel-title>
         <v-expansion-panel-text>
           <v-card class="pa-4">
-            <v-card-title>
-              <h3>Filtros e Agrupamentos</h3>
-            </v-card-title>
-
             <v-card-text>
               <v-form>
+                <h2>Filtros</h2>
+                <v-divider></v-divider>
                 <!-- Linha 1: Cliente e Elemento -->
-                <v-row>
-                  <v-col cols="12" md="6">
+                <v-row class="mt-5">
+                  <v-col cols="12" md="4">
                     <v-select
                       label="Cliente"
                       :items="clientes"
@@ -25,13 +23,23 @@
                       @update:modelValue="changeCliente"
                     />
                   </v-col>
-                  <v-col cols="12" md="6">
+                  <v-col cols="12" md="4">
                     <v-select
                       label="Elemento"
                       :items="elementos"
                       v-model="filtros.elemento"
                       item-title="valor"
                       item-value="item"
+                    />
+                  </v-col>
+                  <v-col cols="12" md="4">
+                    <v-select
+                      label="Anos"
+                      :items="anos"
+                      v-model="anosSelecionados"
+                      item-title="ano"
+                      item-value="ano"
+                      multiple
                     />
                   </v-col>
                 </v-row>
@@ -100,34 +108,27 @@
                       multiple
                       :disabled="!filtros.clienteID && !filtros.elemento"
                     />
-                  </v-col>
-                  <v-col cols="12" md="4">
-                    <v-text-field
-                      label="Ano"
-                      type="number"
-                      v-model="filtros.ano"
-                      :disabled="!filtros.clienteID && !filtros.elemento"
-                    ></v-text-field>
-                  </v-col>
+                  </v-col>                  
                 </v-row>
 
-                <!-- Linha 4: Checkboxes e botão EXIBIR -->
-                <v-row>
+                <h2>Quais Gráficos exibir?</h2>
+                <v-divider></v-divider>
+                <v-row class="mt-5">
                   <v-col cols="12">
                     <div class="d-flex align-items-center flex-wrap">
                       <v-checkbox
-                        v-for="agrupamento in agrupamentosDisponiveis"
-                        :key="agrupamento.value"
-                        v-model="agrupamentosSelecionados"
-                        :label="agrupamento.label"
-                        :value="agrupamento.value"
+                        v-for="g in graficosDisponiveis"
+                        :key="g.label"
+                        v-model="g.checked"
+                        :label="g.label"
+                        :value="g.label"
                         class="mr-4"
                         :disabled="!filtros.clienteID && !filtros.elemento"
                       />
                       <v-btn
                         color="primary"
                         class="ml-auto"
-                        @click="buscarDadosDeFazendas"
+                        @click="preencherDashboards"
                         :disabled="!filtros.clienteID && !filtros.elemento"
                       >
                         EXIBIR
@@ -135,6 +136,7 @@
                     </div>
                   </v-col>
                 </v-row>
+
               </v-form>
             </v-card-text>
           </v-card>
@@ -148,7 +150,12 @@
         <v-divider></v-divider>
         <v-row class="mt-5">
           <!-- Gráfico 1: Fazendas -->
-          <v-col cols="12" md="6">
+          <v-col
+            cols="6"
+            v-if="
+              graficosDisponiveis.find((x) => x.label === 'Fazenda').checked
+            "
+          >
             <GChart
               type="ColumnChart"
               :data="graficoFazendasDados"
@@ -157,7 +164,10 @@
           </v-col>
 
           <!-- Gráfico 2: Talhões -->
-          <v-col cols="12" md="6">
+          <v-col
+            cols="6"
+            v-if="graficosDisponiveis.find((x) => x.label === 'Talhão').checked"
+          >
             <GChart
               type="ColumnChart"
               :data="graficoTalhoesDados"
@@ -167,7 +177,10 @@
         </v-row>
         <v-row class="mt-5">
           <!-- Gráfico 3: Glebas -->
-          <v-col cols="12" md="6">
+          <v-col
+            cols="6"
+            v-if="graficosDisponiveis.find((x) => x.label === 'Gleba').checked"
+          >
             <GChart
               type="ColumnChart"
               :data="graficoGlebasDados"
@@ -176,16 +189,37 @@
           </v-col>
 
           <!-- Gráfico 4: Pontos -->
-          <v-col cols="12" md="6">
+          <v-col
+            cols="6"
+            v-if="graficosDisponiveis.find((x) => x.label === 'Ponto').checked"
+          >
             <GChart
               type="ColumnChart"
               :data="graficoPontosDados"
               :options="graficoPontosOpcoes"
             />
           </v-col>
+
+          <!-- Gráfico 5: Profundidades -->
+          <v-col
+            cols="6"
+            v-if="
+              graficosDisponiveis.find((x) => x.label === 'Profundidade')
+                .checked
+            "
+          >
+            <GChart
+              type="ColumnChart"
+              :data="graficoProfundidadesDados"
+              :options="graficoProfundidadesOpcoes"
+            />
+          </v-col>
         </v-row>
       </v-card-text>
     </v-card>
+    <v-alert type="info" elevation="2" border="start" v-else>
+      Sem dados para exibir com os filtros selecionados
+    </v-alert>
   </v-container>
 </template>
 
@@ -200,8 +234,8 @@ export default {
   },
   data() {
     return {
-      coresPorAno: {},
-      painelAberto: [0],
+      coresPorAno: [],
+      painelAberto: [],
       showDashboard: false,
       carregando: false,
       clientes: [],
@@ -260,27 +294,28 @@ export default {
         glebas: [],
         profundidades: [],
         pontos: [],
-        ano: "2024",
+        ano: "",
       },
       fazendas: [],
       talhoes: [],
       glebas: [],
       pontos: [],
       profundidades: [],
-      agrupamentosDisponiveis: [
-        { label: "Fazenda", value: "fazenda" },
-        { label: "Talhão", value: "talhao" },
-        { label: "Gleba", value: "gleba" },
-        { label: "Ponto de Coleta", value: "pontoColeta" },
-        { label: "Profundidade", value: "profundidade" },
-        { label: "Ano", value: "ano" },
+      graficosDisponiveis: [
+        { label: "Fazenda", checked: false },
+        { label: "Talhão", checked: false },
+        { label: "Gleba", checked: false },
+        { label: "Ponto", checked: false },
+        { label: "Profundidade", checked: false },
       ],
+      agrupamentosDisponiveis: [{ label: "Agrupar por Ano", value: "ano" }],
       agrupamentosSelecionados: [],
       // Gráficos
       graficoFazendasDados: [],
       graficoTalhoesDados: [],
       graficoGlebasDados: [],
       graficoPontosDados: [],
+      graficoProfundidadesDados: [],
       graficoFazendasOpcoes: {
         title: "Valores por Fazenda",
         hAxis: { title: "Fazendas" },
@@ -295,7 +330,7 @@ export default {
       },
       graficoGlebasOpcoes: {
         title: "Valores por Gleba",
-        hAxis: { title: "Talhões" },
+        hAxis: { title: "Glebas" },
         vAxis: { title: "Valor" },
         legend: { position: "none" },
       },
@@ -305,6 +340,14 @@ export default {
         vAxis: { title: "Valor" },
         legend: { position: "none" },
       },
+      graficoProfundidadesOpcoes: {
+        title: "Valores por Profundidade",
+        hAxis: { title: "Profundidades" },
+        vAxis: { title: "Valor" },
+        legend: { position: "none" },
+      },
+      anos: [],
+      anosSelecionados: [],
     };
   },
   methods: {
@@ -325,7 +368,7 @@ export default {
         glebas: [],
         profundidades: [],
         pontos: [],
-        ano: "2024",
+        ano: "",
       };
 
       this.talhoes = [];
@@ -375,219 +418,222 @@ export default {
         console.log(error);
       }
     },
-    gerarCorAleatoria() {
-      return `#${Math.floor(Math.random() * 16777215)
-        .toString(16)
-        .padStart(6, "0")}`;
-    },
-    obterCorPorAno(ano) {
-      if (!this.coresPorAno[ano]) {
-        // Gera uma cor aleatória apenas se ainda não existir para o ano
-        this.coresPorAno[ano] = `#${Math.floor(Math.random() * 16777215)
-          .toString(16)
-          .padStart(6, "0")}`;
+    async preencherDashboards() {
+      if (this.anosSelecionados.length === 0) {
+        this.showDashboard = false;
+        this.painelAberto = [];
+        return;
       }
-      return this.coresPorAno[ano];
-    },
-    async simularChamadaAPI(endpoint, params) {
-      console.log(`Simulando chamada para ${endpoint} com`, params);
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          if (endpoint === "fazendas") {
-            resolve([
-              [
-                "Fazenda",
-                "2022",
-                { role: "style" },
-                "2023",
-                { role: "style" },
-                "2024",
-                { role: "style" },
-              ],
-              [
-                "Fazenda A",
-                120,
-                this.obterCorPorAno("2022"),
-                140,
-                this.obterCorPorAno("2023"),
-                160,
-                this.obterCorPorAno("2024"),
-              ],
-              [
-                "Fazenda B",
-                90,
-                this.obterCorPorAno("2022"),
-                110,
-                this.obterCorPorAno("2023"),
-                130,
-                this.obterCorPorAno("2024"),
-              ],
-              [
-                "Fazenda C",
-                60,
-                this.obterCorPorAno("2022"),
-                80,
-                this.obterCorPorAno("2023"),
-                100,
-                this.obterCorPorAno("2024"),
-              ],
-            ]);
+      this.anosSelecionados.sort();
+      this.preencherColunasGraficos();
+      this.preencherTitulosGraficos();
+
+      try {
+        const resp = await DashboardService.getDashboard(this.filtros);
+
+        if (resp.data.fazendas.length > 0) {
+          if (this.anosSelecionados.length > 0) {
+            this.agruparInformacoes(resp.data);
+          } else {
+            this.agruparInformacoesSemAno(resp.data);
           }
-          if (endpoint === "talhoes") {
-            resolve([
-              [
-                "Talhão",
-                "2022",
-                { role: "style" },
-                "2023",
-                { role: "style" },
-                "2024",
-                { role: "style" },
-              ],
-              [
-                "Talhão 1",
-                50,
-                this.obterCorPorAno("2022"),
-                70,
-                this.obterCorPorAno("2023"),
-                90,
-                this.obterCorPorAno("2024"),
-              ],
-              [
-                "Talhão 2",
-                30,
-                this.obterCorPorAno("2022"),
-                50,
-                this.obterCorPorAno("2023"),
-                70,
-                this.obterCorPorAno("2024"),
-              ],
-              [
-                "Talhão 3",
-                70,
-                this.obterCorPorAno("2022"),
-                90,
-                this.obterCorPorAno("2023"),
-                110,
-                this.obterCorPorAno("2024"),
-              ],
+        } else {
+          this.showDashboard = false;
+          this.painelAberto = [];
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    preencherColunasGraficos() {
+      const colunas = [
+        "Categoria",
+        ...this.anosSelecionados.map((ano) => ano.toString())
+      ];
+      this.graficoFazendasDados = [colunas];
+      this.graficoTalhoesDados = [colunas];
+      this.graficoGlebasDados = [colunas];
+      this.graficoPontosDados = [colunas];
+      this.graficoProfundidadesDados = [colunas];
+    },
+
+    preencherTitulosGraficos() {
+      this.graficoFazendasOpcoes.title =
+        "Valores por Fazenda - " + this.filtros.elemento;
+
+      this.graficoTalhoesOpcoes.title =
+        "Valores por Talhão - " + this.filtros.elemento;
+
+      this.graficoGlebasOpcoes.title =
+        "Valores por Gleba - " + this.filtros.elemento;
+
+      this.graficoPontosOpcoes.title =
+        "Valores por Ponto - " + this.filtros.elemento;
+
+      this.graficoProfundidadesOpcoes.title =
+        "Valores por Profundidade - " + this.filtros.elemento;
+    },
+    agruparInformacoes(data) {
+      const obterValoresPorAno = (anos) => {
+        return this.anosSelecionados.map((ano) => {
+          const anoData = anos.find((a) => a.nome.toString() === ano.toString());
+          return anoData ? anoData.valor : 0; // Preenche com 0 se o ano não existir
+        });
+      };
+
+      data.fazendas.forEach((fazenda) => {
+        let valoresFazenda = this.anosSelecionados.map(() => 0);
+
+        fazenda.talhoes.forEach((talhao) => {
+          let valoresTalhao = this.anosSelecionados.map(() => 0);
+
+          talhao.glebas.forEach((gleba) => {
+            let valoresGleba = this.anosSelecionados.map(() => 0);
+
+            gleba.pontos.forEach((ponto) => {
+              let valoresPonto = this.anosSelecionados.map(() => 0);
+
+              ponto.profundidades.forEach((profundidade) => {
+                const valoresProfundidade = obterValoresPorAno(
+                  profundidade.anos
+                );
+
+                // Adicionar dados ao gráfico de profundidades
+                this.graficoProfundidadesDados.push([
+                  profundidade.nome,
+                  ...valoresProfundidade
+                ]);
+
+                // Somar os valores por ano
+                valoresPonto = valoresPonto.map(
+                  (v, index) => v + valoresProfundidade[index]
+                );
+              });
+
+              this.graficoPontosDados.push([
+                ponto.nome,
+                ...valoresPonto
+              ]);
+              valoresGleba = valoresGleba.map(
+                (v, index) => v + valoresPonto[index]
+              );
+            });
+
+            this.graficoGlebasDados.push([
+              gleba.nome,
+              ...valoresGleba
             ]);
-          }
-          if (endpoint === "glebas") {
-            resolve([
-              [
-                "Gleba",
-                "2022",
-                { role: "style" },
-                "2023",
-                { role: "style" },
-                "2024",
-                { role: "style" },
-              ],
-              [
-                "Gleba A",
-                175,
-                this.obterCorPorAno("2022"),
-                190,
-                this.obterCorPorAno("2023"),
-                210,
-                this.obterCorPorAno("2024"),
-              ],
-              [
-                "Gleba B",
-                47,
-                this.obterCorPorAno("2022"),
-                65,
-                this.obterCorPorAno("2023"),
-                75,
-                this.obterCorPorAno("2024"),
-              ],
-              [
-                "Gleba C",
-                250,
-                this.obterCorPorAno("2022"),
-                270,
-                this.obterCorPorAno("2023"),
-                300,
-                this.obterCorPorAno("2024"),
-              ],
-            ]);
-          }
-          if (endpoint === "pontos") {
-            resolve([
-              [
-                "Ponto",
-                "2022",
-                { role: "style" },
-                "2023",
-                { role: "style" },
-                "2024",
-                { role: "style" },
-              ],
-              [
-                "Ponto X",
-                22,
-                this.obterCorPorAno("2022"),
-                45,
-                this.obterCorPorAno("2023"),
-                67,
-                this.obterCorPorAno("2024"),
-              ],
-              [
-                "Ponto Y",
-                85,
-                this.obterCorPorAno("2022"),
-                90,
-                this.obterCorPorAno("2023"),
-                100,
-                this.obterCorPorAno("2024"),
-              ],
-              [
-                "Ponto Z",
-                96,
-                this.obterCorPorAno("2022"),
-                110,
-                this.obterCorPorAno("2023"),
-                120,
-                this.obterCorPorAno("2024"),
-              ],
-            ]);
-          }
-        }, 1000);
+            valoresTalhao = valoresTalhao.map(
+              (v, index) => v + valoresGleba[index]
+            );
+          });
+
+          this.graficoTalhoesDados.push([
+            talhao.nome,
+            ...valoresTalhao
+          ]);
+          valoresFazenda = valoresFazenda.map(
+            (v, index) => v + valoresTalhao[index]
+          );
+        });
+
+        this.graficoFazendasDados.push([
+          fazenda.nome,
+          ...valoresFazenda
+        ]);
       });
-    },
-    async buscarDadosDeFazendas() {
-      this.graficoFazendasDados = [];
-      this.graficoFazendasDados = await this.simularChamadaAPI("fazendas", {
-        filtros: this.filtros,
-      });
-      this.buscarDadosDeTalhoes();
-    },
-    async buscarDadosDeTalhoes() {
-      this.graficoTalhoesDados = [];
-      this.graficoTalhoesDados = await this.simularChamadaAPI("talhoes", {
-        filtros: this.filtros,
-      });
-      this.buscarDadosDeGlebas();
-    },
-    async buscarDadosDeGlebas() {
-      this.graficoGlebasDados = [];
-      this.graficoGlebasDados = await this.simularChamadaAPI("glebas", {
-        filtros: this.filtros,
-      });
-      this.buscarDadosDePontos();
-    },
-    async buscarDadosDePontos() {
-      this.graficoPontosDados = [];
-      this.graficoPontosDados = await this.simularChamadaAPI("pontos", {
-        filtros: this.filtros,
-      });
-      this.painelAberto = [];
+
       this.showDashboard = true;
+      this.painelAberto = [];
+    },
+    agruparInformacoesSemAno(data) {
+      data.fazendas.forEach((fazenda) => {
+        let totalFazenda = 0;
+
+        fazenda.talhoes.forEach((talhao) => {
+          let totalTalhao = 0;
+
+          talhao.glebas.forEach((gleba) => {
+            let totalGleba = 0;
+
+            gleba.pontos.forEach((ponto) => {
+              let totalPonto = 0;
+
+              ponto.profundidades.forEach((profundidade) => {
+                let totalProfundidade = 0;
+
+                profundidade.anos.forEach((ano) => {
+                  totalProfundidade += ano.valor;
+                });
+
+                // Adicionar dados do gráfico de profundidades
+                this.graficoProfundidadesDados.push([
+                  profundidade.nome,
+                  totalProfundidade,
+                  this.obterCorPorAno(this.filtros.ano),
+                ]);
+
+                totalPonto += totalProfundidade;
+              });
+
+              // Adicionar dados do gráfico de pontos
+              this.graficoPontosDados.push([
+                ponto.nome,
+                totalPonto,
+                this.obterCorPorAno(this.filtros.ano),
+              ]);
+
+              totalGleba += totalPonto;
+            });
+
+            // Adicionar dados do gráfico de glebas
+            this.graficoGlebasDados.push([
+              gleba.nome,
+              totalGleba,
+              this.obterCorPorAno(this.filtros.ano),
+            ]);
+
+            totalTalhao += totalGleba;
+          });
+
+          // Adicionar dados do gráfico de talhões
+          this.graficoTalhoesDados.push([
+            talhao.nome,
+            totalTalhao,
+            this.obterCorPorAno(this.filtros.ano),
+          ]);
+
+          totalFazenda += totalTalhao;
+        });
+
+        // Adicionar dados do gráfico de fazendas
+        this.graficoFazendasDados.push([
+          fazenda.nome,
+          totalFazenda,
+          this.obterCorPorAno(this.filtros.ano),
+        ]);
+      });
+
+      this.showDashboard = true;
+      this.painelAberto = [];
+    },
+
+    getYearsFromPast24() {
+      const currentYear = new Date().getFullYear(); // Obtém o ano atual
+      const startYear = currentYear - 24; // Calcula o ano inicial (24 anos atrás)
+      const years = [];
+
+      for (let year = startYear; year <= currentYear; year++) {
+        years.push(year);
+      }
+
+      this.anos = years;
+      this.anosSelecionados.push(2024)
     },
   },
   mounted() {
     this.listarClientes();
+    this.getYearsFromPast24();
   },
 };
 </script>
