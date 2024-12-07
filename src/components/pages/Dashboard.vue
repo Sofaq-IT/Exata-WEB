@@ -108,7 +108,7 @@
                       multiple
                       :disabled="!filtros.clienteID && !filtros.elemento"
                     />
-                  </v-col>                  
+                  </v-col>
                 </v-row>
 
                 <h2>Quais Gráficos exibir?</h2>
@@ -136,7 +136,6 @@
                     </div>
                   </v-col>
                 </v-row>
-
               </v-form>
             </v-card-text>
           </v-card>
@@ -149,6 +148,13 @@
       <v-card-text>
         <v-divider></v-divider>
         <v-row class="mt-5">
+          <v-col
+            cols="12"
+            v-if="graficosDisponiveis.find((x) => x.label === 'Radar').checked"
+          >
+            <canvas id="radarChart"></canvas>
+          </v-col>
+
           <!-- Gráfico 1: Fazendas -->
           <v-col
             cols="6"
@@ -160,6 +166,7 @@
               type="ColumnChart"
               :data="graficoFazendasDados"
               :options="graficoFazendasOpcoes"
+              :events="chartEvents"
             />
           </v-col>
 
@@ -225,15 +232,22 @@
 
 <script>
 import { GChart } from "vue-google-charts";
+import { Chart } from "chart.js";
 import CustomerService from "@/services/CustomerService";
 import DashboardService from "@/services/DashboardService";
 
 export default {
   components: {
     GChart,
+    Chart,
   },
   data() {
     return {
+      chartEvents: {
+        select: () => {},
+      },
+      radarChart: null, // Instância do gráfico de radar
+      radarTitle: "", // Título dinâmico do gráfico de radar
       coresPorAno: [],
       painelAberto: [],
       showDashboard: false,
@@ -302,6 +316,7 @@ export default {
       pontos: [],
       profundidades: [],
       graficosDisponiveis: [
+        { label: "Radar", checked: false },
         { label: "Fazenda", checked: false },
         { label: "Talhão", checked: false },
         { label: "Gleba", checked: false },
@@ -437,6 +452,7 @@ export default {
           } else {
             this.agruparInformacoesSemAno(resp.data);
           }
+          this.initRadarChart(`Gráfico Radar`);
         } else {
           this.showDashboard = false;
           this.painelAberto = [];
@@ -448,7 +464,7 @@ export default {
     preencherColunasGraficos() {
       const colunas = [
         "Categoria",
-        ...this.anosSelecionados.map((ano) => ano.toString())
+        ...this.anosSelecionados.map((ano) => ano.toString()),
       ];
       this.graficoFazendasDados = [colunas];
       this.graficoTalhoesDados = [colunas];
@@ -476,7 +492,9 @@ export default {
     agruparInformacoes(data) {
       const obterValoresPorAno = (anos) => {
         return this.anosSelecionados.map((ano) => {
-          const anoData = anos.find((a) => a.nome.toString() === ano.toString());
+          const anoData = anos.find(
+            (a) => a.nome.toString() === ano.toString()
+          );
           return anoData ? anoData.valor : 0; // Preenche com 0 se o ano não existir
         });
       };
@@ -501,7 +519,7 @@ export default {
                 // Adicionar dados ao gráfico de profundidades
                 this.graficoProfundidadesDados.push([
                   profundidade.nome,
-                  ...valoresProfundidade
+                  ...valoresProfundidade,
                 ]);
 
                 // Somar os valores por ano
@@ -510,37 +528,25 @@ export default {
                 );
               });
 
-              this.graficoPontosDados.push([
-                ponto.nome,
-                ...valoresPonto
-              ]);
+              this.graficoPontosDados.push([ponto.nome, ...valoresPonto]);
               valoresGleba = valoresGleba.map(
                 (v, index) => v + valoresPonto[index]
               );
             });
 
-            this.graficoGlebasDados.push([
-              gleba.nome,
-              ...valoresGleba
-            ]);
+            this.graficoGlebasDados.push([gleba.nome, ...valoresGleba]);
             valoresTalhao = valoresTalhao.map(
               (v, index) => v + valoresGleba[index]
             );
           });
 
-          this.graficoTalhoesDados.push([
-            talhao.nome,
-            ...valoresTalhao
-          ]);
+          this.graficoTalhoesDados.push([talhao.nome, ...valoresTalhao]);
           valoresFazenda = valoresFazenda.map(
             (v, index) => v + valoresTalhao[index]
           );
         });
 
-        this.graficoFazendasDados.push([
-          fazenda.nome,
-          ...valoresFazenda
-        ]);
+        this.graficoFazendasDados.push([fazenda.nome, ...valoresFazenda]);
       });
 
       this.showDashboard = true;
@@ -628,7 +634,59 @@ export default {
       }
 
       this.anos = years;
-      this.anosSelecionados.push(2024)
+      this.anosSelecionados.push(2024);
+    },
+    async initRadarChart(title) {
+      this.radarTitle = title; // Atualiza o título do gráfico
+      this.showRadar = true; // Mostra o modal do gráfico de Radar
+
+      const resp = await DashboardService.getRadar(this.filtros);
+      const labels = Object.keys(resp.data).filter((key) => resp.data[key] > 0);
+      const values = Object.values(resp.data).filter((key) => key > 0);
+
+      this.$nextTick(() => {
+        const ctx = document.getElementById("radarChart").getContext("2d");
+
+        if (this.radarChart) {
+          this.radarChart.destroy(); // Destroi o gráfico anterior, se existir
+        }
+
+        this.radarChart = new Chart(ctx, {
+          type: "radar",
+          data: {
+            labels: labels, // Eixos do radar
+            datasets: [
+              {
+                label: "Gráfico de Radar",
+                data: values, // Valores do radar
+                backgroundColor: "rgba(54, 162, 235, 0.2)",
+                borderColor: "rgba(54, 162, 235, 1)",
+                borderWidth: 2,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: true,
+                position: "top",
+              },
+            },
+            scales: {
+              r: {
+                ticks: {
+                  beginAtZero: true,
+                },
+              },
+            },
+          },
+        });
+      });
+    },
+    closeRadar() {
+      this.showRadar = false; // Fecha o modal do Radar
     },
   },
   mounted() {
