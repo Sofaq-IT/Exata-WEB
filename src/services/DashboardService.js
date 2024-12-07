@@ -6,6 +6,10 @@ class DashboardService {
     return await ApiService.post("/dashboard", param);
   }
 
+  async getRadar(param) {
+    return await ApiService.post("/dashboard/getRadar", param);
+  }
+
   async getFazendas(param) {
     return await ApiService.post("/dashboard/getFazendas", param);
   }
