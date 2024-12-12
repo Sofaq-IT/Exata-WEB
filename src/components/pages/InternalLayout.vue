@@ -166,6 +166,12 @@ export default {
           link: "/interno/usuario",
           permissions: [0, 1],
         },
+        {
+          title: "Relatórios",
+          icon: "mdi-microsoft-excel",
+          link: "/interno/relatorios",
+          permissions: [0, 1],
+        },
       ],
       dadosCadastrais: false,
       showUpdatePassword: false,
