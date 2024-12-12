@@ -3,9 +3,9 @@
     <v-row align="center" justify="center">
       <v-col cols="6" offset="3">
         <v-card>
-          <v-card-text>
+          <v-card-text>            
             <v-img
-              src='@/assets/logo-exata.png'
+              src="@/assets/logo-exata.png"
               class="logo"
               contain
               width="250"
@@ -23,8 +23,9 @@
                 label="Login"
                 prepend-icon="mdi-account"
                 :rules="[rules.required]"
+                :disabled="loading"
               ></v-text-field>
-              
+
               <v-text-field
                 v-model="password"
                 label="Senha"
@@ -36,16 +37,20 @@
                 hint="Mínimo de 8 caracteres"
                 class="mb-3"
                 @click:append="showPass = !showPass"
+                :disabled="loading"
               ></v-text-field>
               <div class="mb-5 text-center">
-              <a
-                class="text-caption text-decoration-none text-blue"
-                href="/esqueciMinhaSenha"
-                rel="noopener noreferrer"
-              >
-                Esqueci minha senha</a></div>
+                <a
+                  class="text-caption text-decoration-none text-blue"
+                  href="/esqueciMinhaSenha"
+                  rel="noopener noreferrer"
+                >
+                  Esqueci minha senha</a
+                >
+              </div>
               <v-divider></v-divider>
-              <v-btn type="submit" class="mt-3 w-100">Entrar</v-btn>
+              <v-btn type="submit" class="mt-3 w-100" :disabled="loading">Entrar</v-btn>
+              <Loading :loading="loading" class="mt-5" />
             </v-form>
             <v-alert v-if="error" type="error" dismissible>{{ error }}</v-alert>
           </v-card-text>
@@ -63,11 +68,16 @@
 </template>
 
 <script>
+import Loading from "@/components/Loading.vue";
 import ApiService from "@/plugins/api";
 import store from "@/plugins/store";
 export default {
+  components: {
+    Loading,
+  },
   data() {
     return {
+      loading: false,
       login: "",
       password: "",
       error: null,
@@ -80,9 +90,10 @@ export default {
     };
   },
   methods: {
-    async handleLogin() {
+    async handleLogin() {      
       const validation = await this.$refs.form.validate();
       if (validation.valid) {
+        this.loading = true;
         try {
           this.error = null;
           const credentials = {
@@ -100,6 +111,7 @@ export default {
         } catch (err) {
           this.error = "Falha no login. Verifique suas credenciais.";
           console.error(err);
+          this.loading = false;
         }
       } else {
         this.error = "Por favor, preencha todos os campos obrigatórios.";

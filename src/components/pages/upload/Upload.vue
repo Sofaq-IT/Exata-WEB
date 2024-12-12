@@ -1,7 +1,7 @@
 <template>
   <v-card>
     <v-card-title>
-      <v-row>
+      <v-row v-if="perfil !== 3">
         <v-col cols="12">
           <a
             href="https://exatastorage.blob.core.windows.net/exata/uploads-realizados/exata-modelo-importacao.xlsx"
@@ -15,7 +15,7 @@
       </v-row>
       <v-row>
         <v-col cols="10">Importações Realizadas</v-col>
-        <v-col cols="2" class="d-flex justify-end">
+        <v-col cols="2" class="d-flex justify-end" v-if="perfil !== 3">
           <v-btn
             variant="outlined"
             color="secondary"
@@ -98,7 +98,7 @@
                       <span>Outros Anexos</span>
                     </v-tooltip>
 
-                    <v-tooltip>
+                    <v-tooltip v-if="perfil !== 3">
                       <template #activator="{ props }">
                         <v-btn
                           v-if="item.statusAtual === 0"
@@ -385,6 +385,7 @@ export default {
   },
   data() {
     return {
+      perfil: 0,
       showCadastro: false,
       showDetalhes: false,
       showAnexos: false,
@@ -536,6 +537,7 @@ export default {
     },
   },
   async mounted() {
+    this.perfil = store.state.authToken.perfilID;
     await this.listUploads();
     await this.listCustomers();
   },
