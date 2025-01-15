@@ -30,6 +30,9 @@ class CompanyService {
     return await ApiService.get('empresa/campos');
   }
 
+  async listAll() {
+    return await ApiService.get("/empresa/listarTodos");
+  }
 }
 
 export default new CompanyService();
