@@ -342,29 +342,86 @@
     </v-card>
   </v-dialog>
   <v-dialog v-model="showAnexos">
-    <v-card>
-      <v-card-title>Outros Anexos</v-card-title>
-      <v-card-text>
-        <div
-          v-for="attach in attachmentsList"
-          :key="attach.uploadID"
-        >
-          <v-divider></v-divider>
-          <v-row class="mt-5 mb-5">
-            <v-col cols="10">{{ attach.nomeArquivoEntrada }}</v-col>
-            <v-col cols="2">
-              <v-btn
-                variant="outlined"
-                color="secondary"
-                size="small"
-                :href="attach.urlStorage"
-                >Baixar<v-icon icon="mdi-download" end></v-icon
-              ></v-btn>
-            </v-col>
-          </v-row>
-        </div>
-      </v-card-text>
-    </v-card>
+    <v-form ref="formExtraAttachments">
+      <v-card>
+        <v-card-title>Outros Anexos</v-card-title>
+        <v-card-text>
+          <div v-for="attach in attachmentsList" :key="attach.uploadID">
+            <v-divider></v-divider>
+            <v-row class="mt-5 mb-5">
+              <v-col cols="10">{{ attach.nomeArquivoEntrada }}</v-col>
+              <v-col cols="2">
+                <v-btn
+                  variant="outlined"
+                  color="secondary"
+                  size="small"
+                  :href="attach.urlStorage"
+                  >Baixar<v-icon icon="mdi-download" end></v-icon
+                ></v-btn>
+              </v-col>
+            </v-row>
+          </div>
+          <div>
+            <v-divider></v-divider>
+            <v-row
+              v-for="(at, index) in countExtraAttachments"
+              :key="at"
+              class="mt-5"
+            >
+              <v-col cols="10">
+                <v-file-input
+                  v-model="extraAttachments[index]"
+                  label="Faça upload aqui do arquivo que deseja importar"
+                  prepend-icon="mdi-upload"
+                  outlined
+                  show-size
+                  placeholder="Nenhum arquivo selecionado"
+                  :rules="requiredRules"
+                ></v-file-input>
+              </v-col>
+              <v-col cols="2">
+                <v-btn
+                  class="ma-2"
+                  color="error"
+                  variant="outlined"
+                  @click="countExtraAttachments--"
+                >
+                  <v-icon icon="mdi-delete"></v-icon>
+                </v-btn>
+              </v-col>
+            </v-row>
+            <v-divider></v-divider>
+            <v-row class="mt-5">
+              <v-col cols="12">
+                <v-btn
+                  variant="outlined"
+                  color="secondary"
+                  size="small"
+                  @click="countExtraAttachments++"
+                  >Novo Anexo<v-icon icon="mdi-paperclip" end></v-icon
+                ></v-btn>
+              </v-col>
+            </v-row>
+          </div>
+        </v-card-text>
+        <v-card-actions>
+          <!-- Botão Next alinhado à direita -->
+          <v-btn
+            outlined
+            color="blue"
+            @click="saveExtraAttachments"
+            v-if="countExtraAttachments > 0"
+          >
+            SALVAR NOVOS ANEXOS
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-form>
+    <v-progress-linear
+      color="cyan"
+      indeterminate
+      v-if="executingExtraAttachents"
+    ></v-progress-linear>
   </v-dialog>
 </template>
 
@@ -390,10 +447,13 @@ export default {
       showDetalhes: false,
       showAnexos: false,
       executingUpload: false,
+      executingExtraAttachents: false,
       step: 1,
       file: null,
       countAttachments: 0,
+      countExtraAttachments: 0,
       attachments: [],
+      extraAttachments: [],
       dadosImportados: [],
       requiredRules: [(v) => !!v || "Campo obrigatório"],
       clientes: [],
@@ -414,6 +474,7 @@ export default {
       ],
       uploadHeaders: [],
       attachmentsList: [],
+      extraAttachmentsUploadID: 0,
     };
   },
   methods: {
@@ -446,7 +507,6 @@ export default {
         this.executingUpload = true;
         const formData = new FormData();
         formData.append("file", this.file);
-        // formData.append("uploadDTO", JSON.stringify(this.upload));
 
         try {
           const response = await axios.post(
@@ -526,6 +586,7 @@ export default {
     },
     async listarAnexos(uploadID) {
       try {
+        this.extraAttachmentsUploadID = uploadID;
         await UploadService.listAttachments(uploadID).then((resp) => {
           this.attachmentsList = resp.data;
           this.showAnexos = true;
@@ -533,6 +594,45 @@ export default {
       } catch (error) {
         console.log(error);
         AlertService.erro(error.response.data);
+      }
+    },
+    async saveExtraAttachments() {
+      const validation = await this.$refs.formExtraAttachments.validate();
+      if (validation.valid) {
+        this.executingExtraAttachents = true;
+        const formData = new FormData();
+        this.extraAttachments.forEach((file) => {
+          formData.append("extraAttachments", file);
+        });
+
+        try {
+          await axios
+            .post(
+              import.meta.env.VITE_API_URL +
+                "/upload/importarAnexos/" +
+                this.extraAttachmentsUploadID,
+              formData,
+              {
+                headers: {
+                  "Content-Type": "multipart/form-data",
+                  Authorization: "Bearer " + store.state.authToken.token,
+                },
+              }
+            )
+            .then(() => {
+              AlertService.sucesso("Anexos adicionados com sucesso!");
+              this.executingExtraAttachents = false;
+              this.showAnexos = false;
+              this.extraAttachments = [];
+              this.countExtraAttachments = 0;
+            });
+        } catch (error) {
+          AlertService.erro(error.response.data);
+          this.executingExtraAttachents = false;
+          this.showAnexos = false;
+          this.extraAttachments = [];
+          this.countExtraAttachments = 0;
+        }
       }
     },
   },
