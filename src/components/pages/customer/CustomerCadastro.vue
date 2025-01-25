@@ -283,32 +283,17 @@ export default {
       }
     },
     async consultaPorCpfCnpj() {
+      
+      this.cliente.clienteID = 0;
+      this.cliente.plano = 1;
+
       try {
         const response = await CustomerService.getByCpfCnpj(
           this.cliente.cpfCnpj.replace(/\D/g, "")
         );
 
         if (response.data) this.cliente = response.data;
-        else {
-          this.cliente = {
-            clienteID: 0,
-            fisicaJuridica: this.cliente.fisicaJuridica,
-            cpfCnpj: this.cliente.cpfCnpj,
-            nomeRazaoSocial: "",
-            apelidoNomeFantasia: "",
-            email: "",
-            telefone: "",
-            cep: "",
-            logradouro: "",
-            numero: "",
-            complemento: "",
-            bairro: "",
-            cidade: "",
-            estado: "",
-            ativo: true,
-            plano: 1
-          };
-        }
+        
       } catch (err) {
         console.log(err);
       }
