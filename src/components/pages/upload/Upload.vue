@@ -98,6 +98,22 @@
                       <span>Outros Anexos</span>
                     </v-tooltip>
 
+                    <v-tooltip>
+                      <template #activator="{ props }">
+                        <v-btn
+                          class="ma-2"
+                          color="error"
+                          size="small"
+                          variant="outlined"
+                          v-bind="props"
+                          @click="excluir(item.uploadID)"
+                        >
+                          <v-icon icon="mdi-trash-can-outline"></v-icon>
+                        </v-btn>
+                      </template>
+                      <span>Excluir</span>
+                    </v-tooltip>
+
                     <v-tooltip v-if="perfil !== 3">
                       <template #activator="{ props }">
                         <v-btn
@@ -429,6 +445,7 @@
 import { VDateInput } from "vuetify/labs/VDateInput";
 import axios from "axios";
 import store from "@/plugins/store";
+import Swal from "sweetalert2";
 import AlertService from "@/plugins/alerts";
 import DataTable from "@/components/DataTable.vue";
 import UploadService from "@/services/UploadService";
@@ -635,6 +652,27 @@ export default {
         }
       }
     },
+    async excluir(uploadID){
+      Swal.fire({
+        title: "Você está certo disso?",
+        text: "Deseja realmente excluir esse upload. Essa operação não poderá ser desfeita.",
+        showCancelButton: true,
+        confirmButtonText: "Sim, pode seguir",
+        cancelButtonText: `Cancelar`,
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          try {
+            await UploadService.delete(uploadID).then((resp) => {              
+              AlertService.sucesso("Upload excluido com sucesso!");
+              this.listUploads();
+            });
+          } catch (error) {
+            console.log(error);
+            AlertService.erro(error.response.data);
+          }
+        }
+      });          
+    }
   },
   async mounted() {
     this.perfil = store.state.authToken.perfilID;
