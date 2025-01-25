@@ -17,6 +17,10 @@ class UploadService {
   async listAttachments(uploadID) {
     return await ApiService.get("/upload/listarAnexos/" + uploadID);
   };
+
+  async delete(uploadID) {
+    return await ApiService.delete("/upload/" + uploadID);
+  };
 }
 
 export default new UploadService();
