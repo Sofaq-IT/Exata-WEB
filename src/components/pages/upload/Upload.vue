@@ -39,7 +39,7 @@
           <template v-slot:item="{ item }">
             <tr>
               <td>{{ item.amostra.cliente.apelidoNomeFantasia }}</td>
-              <td>{{ item.nomeArquivoEntrada }}</td>
+              <td>{{ item.amostra.amostraId }}</td>
               <td>
                 <a :href="item.urlStorage">
                   <v-btn variant="outlined" color="blue" size="small">
@@ -47,7 +47,6 @@
                   </v-btn>
                 </a>
               </td>
-              <td align="center">{{ item.tamanho }}</td>
               <td align="center">{{ item.qtdeRegistros }}</td>
               <td>
                 <v-chip v-if="item.statusAtual === 0" color="primary" outlined
@@ -481,9 +480,8 @@ export default {
       uploads: [],
       headers: [
         { title: "Cliente" },
-        { title: "Arquivo enviado" },
+        { title: "ID da Amostra" },
         { title: "Link para download" },
-        { title: "Tamanho arquivo (em MB)" },
         { title: "Qtde Registros" },
         { title: "Status atual" },
         { title: "Data Cadastro" },
